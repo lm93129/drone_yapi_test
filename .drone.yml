@@ -1,0 +1,30 @@
+---
+kind: pipeline
+name: build
+
+steps:
+  - name: build
+    pull: always
+    image: golang
+    commands:
+      - go build -a -o apitest .
+    environment:
+      CGO_ENABLED: 0
+      GO111MODULE: on
+
+  - name: publish
+    pull: always
+    image: plugins/docker
+    settings:
+      repo: registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test
+      dockerfile: Dockerfile
+      auto_tag: true
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+    when:
+      status:
+        - success
+      event:
+        - tag
