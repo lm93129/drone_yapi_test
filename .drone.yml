@@ -7,7 +7,7 @@ steps:
     pull: always
     image: golang
     commands:
-      - go build -a -o apitest .
+      - GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o apitest .
     environment:
       CGO_ENABLED: 0
       GO111MODULE: on

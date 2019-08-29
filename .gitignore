@@ -3,3 +3,4 @@ drone-dingtalk-message
 .idea
 vendor
 coverage.txt
+apitest
