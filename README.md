@@ -18,8 +18,6 @@ docker run --rm \
   -e PLUGIN_TOKEN=ab1058076e0945cf14 \
   -e PLUGIN_ID=[11, 31, 15] \
   -e PLUGIN_ENV="env_11=网关地址" \
-  -v $(pwd):/drone/src \
-  -w /drone/src \
   registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
 ```
 注意：host地址后面必须接上/
