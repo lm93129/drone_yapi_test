@@ -1,4 +1,4 @@
-FROM alpine:3.4
-RUN apk --no-cache add curl ca-certificates bash
+FROM debian:stretch-slim
+# RUN apk --no-cache add curl ca-certificates bash
 ADD apitest /bin/apitest
-ENTRYPOINT ["/bin/apitest"]
+CMD ["/bin/apitest"]

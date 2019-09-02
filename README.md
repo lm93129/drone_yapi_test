@@ -5,19 +5,16 @@
     image: registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
     settings:
       host: http://yapi.com.cn/
-      id: [11, 31, 15]
+      id: [11,31,15]
       token: ab1058076e0945cf14
       env: env_11=网关地址
-      mode: json
 ```
 使用docker运行
 ```bash
 docker run --rm \
-  -e PLUGIN_HOST=http://yapi.com.cn/ \
-  -e PLUGIN_MODE=json \
+  -e PLUGIN_HOST=http://yapi.com.cn \
   -e PLUGIN_TOKEN=ab1058076e0945cf14 \
-  -e PLUGIN_ID=[11, 31, 15] \
+  -e PLUGIN_ID="11,31,15" \
   -e PLUGIN_ENV="env_11=网关地址" \
   registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
 ```
-注意：host地址后面必须接上/
