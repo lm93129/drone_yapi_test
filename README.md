@@ -18,3 +18,17 @@ docker run --rm \
   -e PLUGIN_ENV="env_11=网关地址" \
   registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
 ```
+
+使用gitlab-ci运行
+```yaml
+apitest:
+  image: registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
+  stage: apitest
+  variables:
+    PLUGIN_HOST: "http://yapi.com.cn"
+    PLUGIN_TOKEN: "ab1058076e0945cf14"
+    PLUGIN_ID: "11,31,15"
+    PLUGIN_ENV: "env_11=网关地址"
+  script:
+    - /bin/apitest
+```
