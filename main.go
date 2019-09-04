@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -65,10 +66,11 @@ func main() {
 	token := os.Getenv("PLUGIN_TOKEN")
 	id := os.Getenv("PLUGIN_ID")
 	env := os.Getenv("PLUGIN_ENV")
-	BaseURL := YApiHOST +
-		"/api/open/run_auto_test?mode=json&email=false&download=false&token=" +
-		token + "&" +
-		env + "&id="
+	BaseURL := fmt.Sprintf("%s/api/open/run_auto_test?token=%s&%s&mode=json&email=false&download=false&id=",
+		YApiHOST,
+		token,
+		env,
+	)
 
 	checkAPI(BaseURL, id)
 }
