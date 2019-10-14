@@ -4,3 +4,4 @@ drone-dingtalk-message
 vendor
 coverage.txt
 apitest
+.env
