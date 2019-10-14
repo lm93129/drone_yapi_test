@@ -26,5 +26,3 @@ steps:
     when:
       status:
         - success
-      event:
-        - tag
