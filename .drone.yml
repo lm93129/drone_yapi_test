@@ -16,8 +16,8 @@ steps:
     pull: always
     image: plugins/docker
     settings:
+      registry: registry.cn-hangzhou.aliyuncs.com
       repo: registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test
-      dockerfile: Dockerfile
       auto_tag: true
       username:
         from_secret: docker_username
