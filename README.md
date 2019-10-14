@@ -23,7 +23,8 @@
 
 ```bash
 docker run --rm \
-  -w /src/xxx项目
+  -w /src/xxx项目(仅当使用env文件的时候需要) \
+  -v /src/xxx项目(仅当使用env文件的时候需要) \
   -e PLUGIN_HOST=http://yapi.com.cn \
   -e PLUGIN_TOKEN=ab1058076e0945cf14 \
   -e PLUGIN_ID="11,31,15" \
