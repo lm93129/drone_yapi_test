@@ -5,3 +5,4 @@ vendor
 coverage.txt
 apitest
 .env
+.vscode
