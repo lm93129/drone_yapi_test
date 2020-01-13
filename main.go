@@ -107,15 +107,20 @@ func dropErr(e error) {
 
 // 发送测试过程的数据到质量平台
 func qapost(url string, body []byte) {
-
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("project_id", os.Getenv("PROJECT"))
-	resp, err := myClient.Do(req)
 	// 这里出错不跳出程序，避免qa平台失效导致的意外退出
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
 	if err != nil {
 		log.Println(err)
 	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("project_id", os.Getenv("PROJECT"))
+	resp, err := myClient.Do(req)
+
+	if err != nil {
+		log.Println(err)
+	}
+
 	s, _ := ioutil.ReadAll(resp.Body)
 	log.Printf("数据收集情况：%s", s)
 }
