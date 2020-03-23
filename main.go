@@ -5,18 +5,16 @@ package main
 // post请求头会带上项目的id
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/guonaihong/gout"
+	"github.com/joho/godotenv"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
 )
+
+var YapiTestJson []YApiJSON
 
 func main() {
 	dir, _ := os.Getwd()
@@ -33,6 +31,19 @@ func main() {
 	)
 
 	CheckApi(BaseURL, id)
+	// 发送数据到数据收集平台
+	if os.Getenv("DATAURL") != "" {
+		err := gout.
+			POST(os.Getenv("DATAURL")).
+			SetHeader(gout.H{"project_id": os.Getenv("PROJECT")}).
+			SetJSON(YapiTestJson).
+			Do()
+
+		if err != nil {
+			log.Printf("发送失败：%s\n", err)
+		}
+	}
+
 }
 
 func CheckApi(BaseUrl, id string) {
@@ -64,65 +75,40 @@ func CheckApi(BaseUrl, id string) {
 	if v > 0 {
 		log.Panic("接口测试不通过，请检查")
 	}
+
 }
 
-var myClient = &http.Client{Timeout: 20 * time.Second}
-
 func YapiAutoTest(url, v string, c chan int) {
-	apiJSON := new(YApiJSON)
-	r, err := myClient.Get(url)
-	dropErr(err)
-	defer r.Body.Close()
+	apiJson := YApiJSON{}
+	err := gout.GET(url).
+		SetTimeout(20 * time.Second).
+		BindJSON(&apiJson).
+		Do()
 
-	_ = json.NewDecoder(r.Body).Decode(apiJSON)
-	log.Printf("开始测试ID为 %s 的用例集合 ", v)
-	apijsondata, err := json.Marshal(apiJSON)
-	qaurl := os.Getenv("DATAURL")
-	if qaurl != "" && err == nil {
-		qapost(qaurl, apijsondata)
+	if err != nil {
+		log.Printf("Yapi请求错误: %s\n", err)
 	}
-	log.Println(apiJSON.Message.Msg)
 
-	for i := 0; i < len(apiJSON.List); i++ {
-		name := apiJSON.List[i].Name
-		message := apiJSON.List[i].ValidRes[0].Message
+	log.Printf("开始测试ID为 %s 的用例集合 ", v)
+
+	log.Println(apiJson.Message.Msg)
+
+	// 将个测试用例集合的测试结果收集
+	YapiTestJson = append(YapiTestJson, apiJson)
+
+	for i := 0; i < len(apiJson.List); i++ {
+
+		name := apiJson.List[i].Name
+		message := apiJson.List[i].ValidRes[0].Message
 		log.Printf("接口用例名称：%s , 验证结果： %s \n", name, message)
 	}
-	if apiJSON.Message.FailedNum != 0 {
-		log.Printf("接口验证不通过，错误数：%d , 用例集合耗时：%s \n", apiJSON.Message.FailedNum, apiJSON.RunTime)
+
+	if apiJson.Message.FailedNum != 0 {
+		log.Printf("接口验证不通过，错误数：%d , 用例集合耗时：%s \n", apiJson.Message.FailedNum, apiJson.RunTime)
 		c <- 1
 	}
 	c <- 0
-	//发送数据到数据收集平台
 
-}
-
-// 处理错误
-func dropErr(e error) {
-	if e != nil {
-		log.Println("出现异常错误，错误如下")
-		log.Panic(e)
-	}
-}
-
-// 发送测试过程的数据到质量平台
-func qapost(url string, body []byte) {
-	// 这里出错不跳出程序，避免qa平台失效导致的意外退出
-	req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
-	if err != nil {
-		log.Println(err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("project_id", os.Getenv("PROJECT"))
-	resp, err := myClient.Do(req)
-
-	if err != nil {
-		log.Println(err)
-	}
-
-	s, _ := ioutil.ReadAll(resp.Body)
-	log.Printf("数据收集情况：%s", s)
 }
 
 // YApiJSON 返回的json序列化
