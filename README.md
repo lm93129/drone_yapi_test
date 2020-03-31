@@ -33,8 +33,8 @@ docker run --rm \
   -e PLUGIN_ID="11,31,15" \
   -e PLUGIN_ENV="env_11=网关地址" \
   # 非必须参数，该参数会发送测试过程中的yapi参数到DATAURL地址中，进行数据收集
-  # -e DATAURL="http://127.0.0.1:3000/interface/apidata" \
-  # -e PROJECT="etl-root" \
+  # -e PLUGIN_DATAURL="http://127.0.0.1:3000/interface/apidata" \
+  # -e PLUGIN_PROJECT="etl-root" \
   registry.cn-hangzhou.aliyuncs.com/lm93129/drone_yapi_test:latest
 ```
 
@@ -50,8 +50,8 @@ apitest:
     PLUGIN_ID: "11,31,15"
     PLUGIN_ENV: "env_11=网关地址"
     # 非必须参数，该参数会发送测试过程中的yapi参数到DATAURL地址中，进行数据收集
-    DATAURL: "http://127.0.0.1:3000/interface/apidata"
-    PROJECT: "etl-root"
+    PLUGIN_DATAURL: "http://127.0.0.1:3000/interface/apidata"
+    PLUGIN_PROJECT: "etl-root"
   script:
     - /bin/apitest
 ```
