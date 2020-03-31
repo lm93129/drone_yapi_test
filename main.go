@@ -16,11 +16,11 @@ import (
 )
 
 var YapiTestJson []YApiJSON
+var cstZone = time.FixedZone("GMT", 8*3600)
 
 func main() {
 	dir, _ := os.Getwd()
 	_ = godotenv.Load(dir + "/.env")
-
 	YApiHOST := os.Getenv("PLUGIN_HOST")
 	token := os.Getenv("PLUGIN_TOKEN")
 	id := os.Getenv("PLUGIN_ID")
@@ -43,48 +43,45 @@ func main() {
 
 		if err != nil {
 			log.Printf("发送失败：%s\n", err)
+		} else {
+			log.Println("数据发送成功")
 		}
 	}
 
-	if check == false {
-		log.Panic("接口测试不通过，请检查")
+	if check > 0 {
+		log.Panicf("接口测试不通过，请检查接口。错误用例数共：%d 个", check)
 	}
 }
 
-func CheckApi(BaseUrl, id string) bool {
+func CheckApi(BaseUrl, id string) int {
 	l := strings.Split(id, ",")
 	c := make(chan int, len(l))
-	v := 0
+	var errCase int
 
 	// 启动多线程遍历请求每一个用例集合
 	for _, v := range l {
 		url := BaseUrl + v
 		go func(u, v string) {
-			YapiAutoTest(u, v, c)
+			errCase = errCase + YapiAutoTest(u, v)
+			c <- 1
 		}(url, v)
 	}
 
 	// 打印每一个用例集合
 	tm := time.NewTimer(time.Second * 20)
-	for i := 0; i < len(l); i++ {
+	for range l {
 		select {
-		case msg := <-c:
-			v += msg
+		case <-c:
 		case <-tm.C:
 			log.Println("测试超时，请检查网络环境")
 		}
-
 	}
 
-	// 做个统计，在所有接口测试完毕之后统计是否有不通过的测试用例集合
-	// 如果有不通过的用例就会报错跳出
-	if v > 0 {
-		return false
-	}
-	return true
+	// 返回总的错误用例数
+	return errCase
 }
 
-func YapiAutoTest(url, v string, c chan int) {
+func YapiAutoTest(url, v string) int {
 	apiJson := YApiJSON{}
 	// 请求Yapi的测试
 	err := gout.GET(url).
@@ -99,27 +96,27 @@ func YapiAutoTest(url, v string, c chan int) {
 
 	log.Printf("开始测试ID为 %s 的用例集合 ", v)
 
-	log.Println(apiJson.Message.Msg)
+	log.Printf("%s 用例集合耗时：%s \n", apiJson.Message.Msg, apiJson.RunTime)
 
 	// 将个测试用例集合的测试结果收集
 	YapiTestJson = append(YapiTestJson, apiJson)
 
 	for i := 0; i < len(apiJson.List); i++ {
-
 		name := apiJson.List[i].Name
 		message := apiJson.List[i].ValidRes[0].Message
-		log.Printf("接口用例名称：%s , 验证结果： %s \n", name, message)
+		if message != "验证通过" {
+			log.Printf("接口用例名称：%s , 验证结果： %s \n", name, message)
+		}
 	}
 
 	if apiJson.Message.FailedNum != 0 {
 		log.Printf("接口验证不通过，错误数：%d , 用例集合耗时：%s \n", apiJson.Message.FailedNum, apiJson.RunTime)
-		c <- 1
 	}
-	c <- 0
 
+	return apiJson.Message.FailedNum
 }
 
-// YApiJSON 返回的json序列化
+// YApi 返回的json序列化结构体
 type YApiJSON struct {
 	Message struct {
 		Msg        string `json:"msg"`
