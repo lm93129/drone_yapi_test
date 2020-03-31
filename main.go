@@ -1,17 +1,18 @@
 package main
 
-// PROJECT 项目id
-// DATAURL 数据收集平台的地址
-// post请求头会带上项目的id
+// PLUGIN_PROJECT 项目id
+// PLUGIN_DATAURL 数据收集平台的地址
+// post请求头会带上项目的project_id：PLUGIN_PROJECT
 
 import (
 	"fmt"
-	"github.com/guonaihong/gout"
-	"github.com/joho/godotenv"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/guonaihong/gout"
+	"github.com/joho/godotenv"
 )
 
 var YapiTestJson []YApiJSON
@@ -30,12 +31,13 @@ func main() {
 		env,
 	)
 
-	CheckApi(BaseURL, id)
-	// 发送数据到数据收集平台
-	if os.Getenv("DATAURL") != "" {
+	check := CheckApi(BaseURL, id)
+
+	// 如果存在PLUGIN_DATAURL则发送数据到数据收集平台
+	if os.Getenv("PLUGIN_DATAURL") != "" {
 		err := gout.
-			POST(os.Getenv("DATAURL")).
-			SetHeader(gout.H{"project_id": os.Getenv("PROJECT")}).
+			POST(os.Getenv("PLUGIN_DATAURL")).
+			SetHeader(gout.H{"project_id": os.Getenv("PLUGIN_PROJECT")}).
 			SetJSON(YapiTestJson).
 			Do()
 
@@ -44,9 +46,12 @@ func main() {
 		}
 	}
 
+	if check == false {
+		log.Panic("接口测试不通过，请检查")
+	}
 }
 
-func CheckApi(BaseUrl, id string) {
+func CheckApi(BaseUrl, id string) bool {
 	l := strings.Split(id, ",")
 	c := make(chan int, len(l))
 	v := 0
@@ -60,31 +65,34 @@ func CheckApi(BaseUrl, id string) {
 	}
 
 	// 打印每一个用例集合
+	tm := time.NewTimer(time.Second * 20)
 	for i := 0; i < len(l); i++ {
-		tm := time.NewTimer(time.Second * 20)
 		select {
 		case msg := <-c:
 			v += msg
 		case <-tm.C:
 			log.Println("测试超时，请检查网络环境")
 		}
+
 	}
 
 	// 做个统计，在所有接口测试完毕之后统计是否有不通过的测试用例集合
 	// 如果有不通过的用例就会报错跳出
 	if v > 0 {
-		log.Panic("接口测试不通过，请检查")
+		return false
 	}
-
+	return true
 }
 
 func YapiAutoTest(url, v string, c chan int) {
 	apiJson := YApiJSON{}
+	// 请求Yapi的测试
 	err := gout.GET(url).
 		SetTimeout(20 * time.Second).
 		BindJSON(&apiJson).
 		Do()
 
+	// 如果错误，则打印错误出来
 	if err != nil {
 		log.Printf("Yapi请求错误: %s\n", err)
 	}
