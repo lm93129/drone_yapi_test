@@ -16,7 +16,6 @@ import (
 )
 
 var YapiTestJson []YApiJSON
-var cstZone = time.FixedZone("GMT", 8*3600)
 
 func main() {
 	dir, _ := os.Getwd()
