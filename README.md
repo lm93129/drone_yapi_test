@@ -17,6 +17,8 @@
     id: [11,31,15]
     token: ab1058076e0945cf14
     env: env_11=网关地址
+    # 是否包含子集，适用于yapi的子集分支,如果没有该参数，则默认不包含子集
+    DESCENDANTS: "true"
     # 非必须参数，该参数会发送测试过程中的yapi参数到DATAURL地址中，进行数据收集
     DATAURL: http://127.0.0.1:3000/interface/apidata
     PROJECT: etl-root
@@ -32,6 +34,8 @@ docker run --rm \
   -e PLUGIN_TOKEN=ab1058076e0945cf14 \
   -e PLUGIN_ID="11,31,15" \
   -e PLUGIN_ENV="env_11=网关地址" \
+  # 是否包含子集，适用于yapi的子集分支
+  -e PLUGIN_DESCENDANTS="true" \
   # 非必须参数，该参数会发送测试过程中的yapi参数到DATAURL地址中，进行数据收集
   # -e PLUGIN_DATAURL="http://127.0.0.1:3000/interface/apidata" \
   # -e PLUGIN_PROJECT="etl-root" \
@@ -49,6 +53,8 @@ apitest:
     PLUGIN_TOKEN: "ab1058076e0945cf14"
     PLUGIN_ID: "11,31,15"
     PLUGIN_ENV: "env_11=网关地址"
+    # 是否包含子集，适用于yapi的子集分支
+    PLUGIN_DESCENDANTS: "true"
     # 非必须参数，该参数会发送测试过程中的yapi参数到DATAURL地址中，进行数据收集
     PLUGIN_DATAURL: "http://127.0.0.1:3000/interface/apidata"
     PLUGIN_PROJECT: "etl-root"

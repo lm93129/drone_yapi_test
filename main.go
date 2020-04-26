@@ -18,16 +18,25 @@ import (
 var YapiTestJson []YApiJSON
 
 func main() {
+	// 获取当前目录
 	dir, _ := os.Getwd()
+	// 自动载入环境变量
 	_ = godotenv.Load(dir + "/.env")
+	// yapi地址
 	YApiHOST := os.Getenv("PLUGIN_HOST")
+	// 令牌
 	token := os.Getenv("PLUGIN_TOKEN")
+	// 测试ID
 	id := os.Getenv("PLUGIN_ID")
+	// 环境变量选项
 	env := os.Getenv("PLUGIN_ENV")
-	BaseURL := fmt.Sprintf("%s/api/open/run_auto_test?token=%s&%s&mode=json&email=false&download=false&id=",
+	// 子集选项
+	descendants := os.Getenv("PLUGIN_DESCENDANTS")
+	BaseURL := fmt.Sprintf("%s/api/open/run_auto_test?token=%s&%s&mode=json&email=false&download=false&descendants=%s&id=",
 		YApiHOST,
 		token,
 		env,
+		descendants,
 	)
 
 	check := CheckApi(BaseURL, id)
