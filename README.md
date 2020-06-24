@@ -61,3 +61,5 @@ apitest:
   script:
     - /bin/apitest
 ```
+发送yapi测试结果功能需要自己有个数据收集的平台，改功能会上传yapi的测试结果json数据到你指定的地址中，PROJECT项目名称会在header的project_id字段中，所以自建的测试数据收集平台需要获取发送过来的json，header中的project_id字段内容。
+具体发送的json示例，可以在wiki中看到
